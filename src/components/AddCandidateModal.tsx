@@ -2,6 +2,22 @@
 
 import { useState } from 'react';
 
+// Types for child components
+type InputProps = {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+};
+
+type TextAreaProps = {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+};
+
 export default function AddCandidateModal() {
   const [form, setForm] = useState({
     type: 'Applicant',
@@ -19,7 +35,9 @@ export default function AddCandidateModal() {
     interviewer: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
@@ -36,7 +54,6 @@ export default function AddCandidateModal() {
 
   return (
     <div className="min-h-screen w-full bg-white text-black px-10 py-8">
-
       <form onSubmit={handleSubmit}>
         {/* Candidate type */}
         <div className="mb-6">
@@ -100,7 +117,7 @@ export default function AddCandidateModal() {
 }
 
 // Input component
-const Input = ({ label, name, value, onChange, type = 'text' }: any) => (
+const Input = ({ label, name, value, onChange, type = 'text' }: InputProps) => (
   <div>
     <label className="text-sm font-medium block mb-1">{label}</label>
     <input
@@ -114,7 +131,7 @@ const Input = ({ label, name, value, onChange, type = 'text' }: any) => (
 );
 
 // TextArea component
-const TextArea = ({ label, name, value, onChange }: any) => (
+const TextArea = ({ label, name, value, onChange }: TextAreaProps) => (
   <div>
     <label className="text-sm font-medium block mb-1">{label}</label>
     <textarea
