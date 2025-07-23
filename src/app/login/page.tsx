@@ -19,7 +19,7 @@ export default function LoginPage() {
     setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleLogin = async (e: React.FormEvent) => {
-    // e.preventDefault()
+    e.preventDefault()
     // await signIn('credentials', {
     //   email: form.email,
     //   password: form.password,
