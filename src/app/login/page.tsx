@@ -103,7 +103,7 @@ export default function LoginPage() {
         </button>
 
         <p className="text-sm text-center mt-4">
-          Don't have an account?{' '}
+          Don&#39;t have an account?{' '}
           <a
             href="/register"
             className={`hover:underline ${
