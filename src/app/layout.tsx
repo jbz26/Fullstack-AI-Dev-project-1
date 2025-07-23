@@ -29,12 +29,12 @@ function Navbar() {
   const currentTheme = theme === 'system' ? systemTheme : theme;
 
   return (
-    <nav className="bg-white dark:bg-[#0f0f0f]  text-black dark:text-white p-4 flex justify-between items-center">
+    <nav className="bg-white dark:bg-[#0f0f0f]  text-black dark:text-white p-4 flex justify-end items-center">
       <button
         onClick={() => setTheme(currentTheme === 'dark' ? 'light' : 'dark')}
-        className="bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-3 py-1 rounded"
+        className="bg-white dark:bg-[#0f0f0f] text-black dark:text-white px-3 py-1 rounded"
       >
-        {currentTheme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+        {currentTheme === 'dark' ? '☀️' : '🌙'}
       </button>
     </nav>
   );
