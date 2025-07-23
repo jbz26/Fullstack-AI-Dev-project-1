@@ -19,12 +19,13 @@ export default function LoginPage() {
     setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await signIn('credentials', {
-      email: form.email,
-      password: form.password,
-      callbackUrl: '/',
-    })
+    // e.preventDefault()
+    // await signIn('credentials', {
+    //   email: form.email,
+    //   password: form.password,
+    //   callbackUrl: '/',
+    // })
+    router.push('/dashboard')
   }
 
   if (!mounted) return null
@@ -68,7 +69,6 @@ export default function LoginPage() {
         <button
           type="submit"
           className="w-full py-2 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600"
-          onClick={()=> router.push('/dashboard')}
         >
           Sign In
         </button>
