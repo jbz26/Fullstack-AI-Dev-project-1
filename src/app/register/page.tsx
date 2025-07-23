@@ -9,6 +9,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+    type FormField = 'fullName' | 'username' | 'email' | 'password';
 
   const [form, setForm] = useState({
     fullName: '',
@@ -62,17 +63,17 @@ export default function RegisterPage() {
             { label: 'Password', name: 'password', type: 'password', placeholder: 'Create a password' },
           ].map((field) => (
             <div key={field.name}>
-              <label className="text-sm font-medium">{field.label}</label>
-              <input
+                <label className="text-sm font-medium">{field.label}</label>
+                <input
                 name={field.name}
-                type={field.type}
-                value={(form as any)[field.name]}
+                type={field.type || 'text'}
+                value={form[field.name as FormField]}  
                 onChange={handleChange}
                 placeholder={field.placeholder}
                 className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#2b2b2b] text-black dark:text-white rounded-xl focus:outline-none"
-              />
+                />
             </div>
-          ))}
+            ))}
 
           <div>
             <label className="text-sm font-medium">Location</label>
