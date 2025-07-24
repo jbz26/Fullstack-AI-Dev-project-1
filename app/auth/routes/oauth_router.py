@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request, Depends, status
 from fastapi.responses import RedirectResponse
-from app.database import SessionLocal
+from app.database import get_db
 from authlib.integrations.starlette_client import OAuth
 from app.auth.jwt import create_access_token
-from app.models import User
+from app.auth.models import User
 from sqlalchemy.orm import Session
 import os
 
@@ -16,13 +16,6 @@ oauth.register(
     client_kwargs={"scope": "openid email profile"},
 )
 
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 router = APIRouter()
 
 @router.get(

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -14,3 +15,5 @@ class User(Base):
     location = Column(String, nullable=True)
     provider = Column(String, default="local")
     google_id = Column(String, nullable=True)
+    candidates = relationship("Candidate", back_populates="hr")  # ← đây là chiều ngược lại
+

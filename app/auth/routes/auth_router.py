@@ -1,24 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from app.schemas import UserCreate, UserLogin
-from app.models import User
-from app.database import SessionLocal
+from app.auth.schemas import UserCreate, UserLogin
+from app.auth.models import User
+from app.database import get_db
 from app.auth.jwt import create_access_token
-from app.auth.oauth import oauth  # oauth instance from authlib.integrations.starlette_client
 from fastapi.responses import RedirectResponse
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
-# Dependency to get DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # -------------------------
 # 1. Đăng ký

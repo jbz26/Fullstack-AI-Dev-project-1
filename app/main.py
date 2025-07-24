@@ -4,9 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.database import engine
-from app.models import Base
-from app.auth.auth_router import router as auth_router
-from app.auth.oauth import router as oauth_router
+from app.auth.models import Base
+from app.auth.routes.auth_router import router as auth_router
+from app.auth.routes.oauth_router import router as oauth_router
+
+from app.candidate.routers import router as candidate_router
+
 from dotenv import load_dotenv
 import os
 
@@ -50,3 +53,5 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(oauth_router, prefix="/oauth", tags=["OAuth"])
+app.include_router(candidate_router, prefix="/candidates", tags=["Candidates"])
+
