@@ -4,11 +4,13 @@ import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@/contexts/UserContext'  // 💡 import context
 
 export default function LoginPage() {
   const router = useRouter()
   const [form, setForm] = useState({ email: '', password: '' })
   const [mounted, setMounted] = useState(false)
+  const { setUser } = useUser(); // 💡 lấy hàm từ context
 
   // Tránh lỗi hydration mismatch do theme chưa xác định
   useEffect(() => {
@@ -19,14 +21,23 @@ export default function LoginPage() {
     setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // await signIn('credentials', {
-    //   email: form.email,
-    //   password: form.password,
-    //   callbackUrl: '/',
-    // })
-    router.push('/dashboard')
-  }
+    e.preventDefault();
+
+    // Giả lập thông tin user
+    const user = {
+      email: form.email,
+      fullName: 'Test User',
+      avatar: 'https://i.pravatar.cc/150?u=' + form.email,
+      id: Math.floor(Math.random() * 1000), // Giả lập ID
+    };
+
+    // Lưu user vào localStorage
+    setUser(user); // 💡 gọi context để lưu user
+
+    // Chuyển trang và buộc reload
+    router.replace('/dashboard'); // chuyển trang trước
+  
+  };
 
   if (!mounted) return null
 

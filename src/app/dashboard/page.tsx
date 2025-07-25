@@ -1,5 +1,6 @@
 'use client';
-
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react'
 import { useState } from 'react';
 import AddCandidateModal from '@/components/AddCandidateModal';
 import {
@@ -12,6 +13,18 @@ import { Button } from '@/components/ui/button';
 
 export default function CandidateDashboard() {
   const [modalOpen, setModalOpen] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+  const handleStorageChange = (event: StorageEvent) => {
+    if (event.key === 'user' && event.newValue === null) {
+      router.replace('/login');
+    }
+  };
+
+  window.addEventListener('storage', handleStorageChange);
+  return () => window.removeEventListener('storage', handleStorageChange);
+}, []);
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0f0f0f] text-black dark:text-white px-6 py-8 transition-colors duration-300">

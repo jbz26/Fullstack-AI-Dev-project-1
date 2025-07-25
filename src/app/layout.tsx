@@ -2,9 +2,10 @@
 
 import { ThemeProvider } from 'next-themes';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Navbar from '@/components/ui/navigation';
 import './globals.css';
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { UserProvider } from '@/contexts/UserContext'; // ⬅️ import context
+
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -16,29 +17,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-function Navbar() {
-  const { theme, setTheme, systemTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  const currentTheme = theme === 'system' ? systemTheme : theme;
-
-  return (
-    <nav className="bg-white dark:bg-[#0f0f0f]  text-black dark:text-white p-4 flex justify-end items-center">
-      <button
-        onClick={() => setTheme(currentTheme === 'dark' ? 'light' : 'dark')}
-        className="bg-white dark:bg-[#0f0f0f] text-black dark:text-white px-3 py-1 rounded"
-      >
-        {currentTheme === 'dark' ? '☀️' : '🌙'}
-      </button>
-    </nav>
-  );
-}
 
 export default function RootLayout({
   children,
@@ -52,10 +31,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <UserProvider>
           <div className="bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen transition-colors duration-300">
-            <Navbar />
+           <Navbar />
             <main>{children}</main>
           </div>
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>
