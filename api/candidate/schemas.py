@@ -28,7 +28,7 @@ class CandidateCreate(BaseModel):
 
 class CandidateResponse(BaseModel):
     # ...
-    candidate_type: CandidateType  # hoặc field nào đang gây lỗi
+    type: CandidateType  # hoặc field nào đang gây lỗi
 
     class Config:
         arbitrary_types_allowed = True  # ✅ thêm dòng này

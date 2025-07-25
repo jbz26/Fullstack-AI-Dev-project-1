@@ -1,12 +1,16 @@
 from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey
 from sqlalchemy.orm import relationship
 from api.models.base import Base
+from sqlalchemy.types import Enum as SQLAlchemyEnum
+from api.candidate.schemas import CandidateType  # Hoặc import Enum từ nơi khai báo
+
 
 class Candidate(Base):
     __tablename__ = "candidates"
 
     id = Column(Integer, primary_key=True, index=True)
-    type = Column(String, default="Applicant")
+    type = Column(SQLAlchemyEnum(CandidateType), default=CandidateType.Applicant)
+
     name = Column(String, nullable=False)
     application_date = Column(Date)
     position = Column(String)
