@@ -37,13 +37,13 @@ export default function HomePage() {
       <div className="flex space-x-4">
         <button
           className="bg-white text-black px-6 py-2 rounded-full hover:bg-gray-200"
-          onClick={() => router.push('/login')}
+          onClick={() => router.push('/auth/login')}
         >
           Login
         </button>
         <button
           className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600"
-          onClick={() => router.push('/register')}
+          onClick={() => router.push('/auth/register')}
         >
           Register
         </button>

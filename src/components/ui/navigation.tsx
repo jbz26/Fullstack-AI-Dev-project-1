@@ -22,7 +22,7 @@ function Navbar() {
 
   const handleLogout = () => {
     logout();
-    router.replace("/login");
+    router.replace("/auth/login");
   };
   
   return (
