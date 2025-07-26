@@ -24,11 +24,24 @@ class CandidateCreate(BaseModel):
     notes: Optional[str]
     hr_id: int  # ✅ khóa ngoại liên kết với tài khoản User
 
-    
 
 class CandidateResponse(BaseModel):
-    # ...
-    type: CandidateType  # hoặc field nào đang gây lỗi
+    id: int
+    type: CandidateType
+    name: str
+    application_date: Optional[date]    
+    position: Optional[str]
+    email: Optional[EmailStr]
+    phone_number: Optional[str]
+    status: Optional[str]
+    source: Optional[str]
+    interview_date: Optional[date]
+    interview_time: Optional[time]
+    interviewer: Optional[str]
+    feedback: Optional[str]
+    notes: Optional[str]
+    hr_id: int
 
     class Config:
-        arbitrary_types_allowed = True  # ✅ thêm dòng này
+        orm_mode = True  # dùng khi trả về từ SQLAlchemy model
+

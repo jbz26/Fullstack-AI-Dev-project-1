@@ -4,7 +4,7 @@ from passlib.context import CryptContext
 from api.auth.schemas import UserCreate, UserLogin
 from api.auth.models import User
 from api.database import get_db
-from api.auth.jwt import create_access_token
+from api.auth.jwt import create_access_token , get_current_user
 from fastapi.responses import RedirectResponse
 
 router = APIRouter()

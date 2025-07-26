@@ -1,26 +1,57 @@
 'use client';
 
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
+import { useUser } from '@/contexts/UserContext'
 
 export default function HomePage() {
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { setUser } = useUser();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = localStorage.getItem('user');
+      const access_token = localStorage.getItem('access_token');
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+      if (user && access_token) {
+        try {
+          const res = await fetch(`${API_URL}/data/user`, {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+              'Content-Type': 'application/json',
+            },
+          });
 
-  const handleLogin = () => {
-    if (form.username === '1' && form.password === '1') {
-      router.push('/dashboard');
-    } else {
-      setError('Invalid credentials');
-    }
-  };
+          if (!res.ok) throw new Error('Lỗi lấy thông tin người dùng');
+
+          const data = await res.json();
+          const user = {
+            email: data.email,
+            fullName: data.full_name,
+            id: data.id,
+            avatar: `https://i.pravatar.cc/150?u=${data.email}`,
+          };
+          setUser(user);
+          router.replace('/dashboard');
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        localStorage.removeItem('user');
+        localStorage.removeItem('access_token');
+        setUser(null);
+      }
+    };
+
+    fetchUser();
+  }, []); 
+
+  
+
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0f0f0f] text-black dark:text-white flex flex-col items-center justify-center transition-colors duration-300">

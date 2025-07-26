@@ -10,12 +10,11 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [mounted, setMounted] = useState(false)
   const { setUser } = useUser()
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  const API_URL = process.env.NEXT_PUBLIC_API_URL!
 
   useEffect(() => {
     setMounted(true)
   }, [])
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 

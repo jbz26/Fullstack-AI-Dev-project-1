@@ -6,7 +6,8 @@ from api.candidate.schemas import CandidateCreate, CandidateResponse
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from api.auth.jwt import get_current_user
-from api.auth.models import User
+from api.auth.schemas import UserResponse
+from api.candidate.models import Candidate
 router = APIRouter( tags=["Candidates"])
 
 @router.post(
@@ -37,7 +38,6 @@ Dữ liệu bắt buộc: `type`, `name`, `hr_id`.
                         "interviewer": "Trần B",
                         "feedback": "Có tiềm năng",
                         "notes": "Ưu tiên gọi lại",
-                        
                         "hr_id": 3
                     }
                 }
@@ -48,22 +48,171 @@ Dữ liệu bắt buộc: `type`, `name`, `hr_id`.
         }
     }
 )
-def add_candidate(candidate: CandidateCreate, db: Session = Depends(get_db)):
+def add_candidate(candidate: CandidateCreate, db: Session = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
     return create_candidate(db, candidate)
 
 
 @router.delete(
-    "/delete{candidate_id}",
-    status_code=204,
-    summary="Xoá ứng viên",
-    description="Xoá một ứng viên khỏi cơ sở dữ liệu dựa trên ID. Nếu không tìm thấy ứng viên, trả về lỗi 404.",
-    responses={
-        204: {"description": "Xoá thành công."},
-        404: {"description": "Không tìm thấy ứng viên với ID đã cho."}
-    }
-)
-def remove_candidate(candidate_id: int, db: Session = Depends(get_db)):
+    path="/delete/{candidate_id}",
+    summary="Xóa ứng viên",
+    description="""Xóa một ứng viên khỏi hệ thống dựa vào `candidate_id`.\n
+    Chỉ những người dùng đã xác thực (có access token hợp lệ) mới được phép thực hiện thao tác này.\n
+    Trả về mã lỗi `404` nếu không tìm thấy ứng viên.
+    """,
+        responses={
+            200: {
+                "description": "Xóa ứng viên thành công.",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "message": "Candidate deleted successfully"
+                        }
+                    }
+                }
+            },
+            401: {
+                "description": "Không có quyền truy cập (token không hợp lệ hoặc không gửi)."
+            },
+            404: {
+                "description": "Không tìm thấy ứng viên với `candidate_id` đã cung cấp."
+            }
+        }
+    )
+def remove_candidate(
+    candidate_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """
+    Xóa ứng viên với ID cụ thể.
+
+    - **candidate_id**: ID của ứng viên cần xóa
+    - **db**: phiên làm việc với cơ sở dữ liệu
+    - **current_user**: người dùng hiện tại (đã xác thực)
+    """
     success = delete_candidate(db, candidate_id)
     if not success:
         raise HTTPException(status_code=404, detail="Candidate not found")
-    return
+    return {"message": "Candidate deleted successfully"}
+
+@router.get(
+    path="/find_candidate/{candidate_id}",
+    response_model=CandidateResponse,
+    summary="Lấy thông tin ứng viên theo ID",
+    description="Lấy thông tin chi tiết của một ứng viên dựa trên `candidate_id`.",
+    responses={
+        200: {
+            "description": "Thông tin ứng viên được trả về thành công.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": 1,
+                        "type": "Applicant",
+                        "name": "Nguyễn Văn A",
+                        "application_date": "2025-07-24",
+                        "position": "Backend Developer",
+                        "email": "example@gmai.com",
+                        "phone_number": "0912345678",
+                        "status": "Pending",
+                        "source": "LinkedIn",
+                        "interview_date": "2025-07-27",
+                        "interview_time": "09:00:00",
+                        "interviewer": "Trần B",
+                        "feedback": "Có tiềm năng",
+                        "notes": "Ưu tiên gọi lại",
+                        "hr_id": 3,
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Không tìm thấy ứng viên với `candidate_id` đã cung cấp."
+        }
+    }
+)
+def get_candidate_by_id(candidate_id: int, db: Session = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
+    """
+    Lấy thông tin ứng viên theo ID.
+
+    - **candidate_id**: ID của ứng viên cần lấy thông tin
+    - **db**: phiên làm việc với cơ sở dữ liệu
+    - **current_user**: người dùng hiện tại (đã xác thực)
+    """
+    candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    # Phân quyền: chỉ HR tương ứng mới được xem
+    if candidate.hr_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You do not have permission to access this candidate")
+    
+    return candidate
+
+@router.get(
+    path="/get_all",
+    response_model=list[CandidateResponse],
+    summary="Lấy danh sách tất cả ứng viên",
+    description="Lấy danh sách tất cả ứng viên đã được tạo bởi người dùng hiện tại (HR).",
+    responses={
+        200: {
+            "description": "Danh sách ứng viên được trả về thành công.",
+            "content": {
+                "application/json": {
+                    "example": [
+                        {
+                            "id": 1,
+                            "type": "Applicant",
+                            "name": "Nguyễn Văn A",
+                            "application_date": "2025-07-24",
+                            "position": "Backend Developer",
+                            "email": "example@gmail.com",
+                            "phone_number": "0912345678",
+                            "status": "Pending",
+                            "source": "LinkedIn",
+                            "interview_date": "2025-07-27",
+                            "interview_time": "09:00:00",
+                            "interviewer": "Trần B",
+                            "feedback": "Có tiềm năng",
+                            "notes": "Ưu tiên gọi lại",
+                            "hr_id": 3
+                        },
+                        {
+                            "id": 2,
+                            "type": "Employee",
+                            "name": "Trần Thị B",
+                            "application_date": "2025-07-25",
+                            "position": "Frontend Developer",
+                            "email": "2@gmail.com",
+                            "phone_number": "0987654321",
+                            "status": "Interviewed",
+                            "source": "Referral",
+                            "interview_date": "2025-07-28",
+                            "interview_time": "10:00:00",
+                            "interviewer": "Nguyễn C",
+                            "feedback": "Phù hợp",
+                            "notes": "Cần đào tạo thêm",
+                            "hr_id": 3
+                        }
+                    ]
+                }
+            }
+        },
+        404: {
+            "description": "Không tìm thấy ứng viên nào cho HR hiện tại."
+        }
+    }
+)
+def get_all_candidates(db: Session = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
+    """
+    Lấy danh sách tất cả ứng viên.
+
+    - **db**: phiên làm việc với cơ sở dữ liệu
+    - **current_user**: người dùng hiện tại (đã xác thực)
+    """
+    print("Fetching candidates for HR ID:", current_user.id)
+    candidates = db.query(Candidate).filter(Candidate.hr_id == current_user.id).all()
+    print(f"Found {len(candidates)} candidates for HR ID: {current_user.id}")
+    if not candidates:
+        raise HTTPException(status_code=404, detail="No candidates found for this HR")
+    # Lọc ứng viên theo HR ID của người dùng hiện tại
+    # ✅ Đảm bảo chỉ lấy ứng viên của HR hiện tại   
+    return candidates
