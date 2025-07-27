@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request, Depends, status
 from fastapi.responses import RedirectResponse, HTMLResponse
-from api.database import get_db
+from database import get_db
 from authlib.integrations.starlette_client import OAuth
-from api.auth.jwt import create_access_token
-from api.auth.models import User
+from auth.jwt import create_access_token
+from auth.models import User
 from sqlalchemy.orm import Session
 import os
 

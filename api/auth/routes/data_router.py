@@ -1,10 +1,10 @@
-from api.auth.jwt import get_current_user
-from api.database import get_user_data
+from auth.jwt import get_current_user
+from database import get_user_data
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from api.database import get_db
-from api.auth.models import User 
-from api.auth.schemas import UserResponse
+from database import get_db
+from auth.models import User 
+from auth.schemas import UserResponse
 
 router = APIRouter( tags=["Data"])
 @router.get("/user", response_model=UserResponse)
