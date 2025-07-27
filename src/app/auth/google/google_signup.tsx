@@ -1,11 +1,15 @@
 // lib/auth/googleSignup.ts
 import axios from '@/utils/axiosInstance';
+import { useRouter } from 'next/navigation';
+
+type RouterType = ReturnType<typeof useRouter>;
+
 export const handleGoogleSignup = async ({
   API_URL,
   router,
 }: {
   API_URL: string;
-  router: any;
+  router: RouterType;
 }) => {
   const popup = window.open(
     `${API_URL}/oauth/google/login`,

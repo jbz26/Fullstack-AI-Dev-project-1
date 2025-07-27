@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import axios from '@/utils/axiosInstance';
+import { AxiosError } from 'axios';
+
 import GenericDialog from '@/components/dialog/GenericDialog';
 
 export default function CandidateDashboard() {
@@ -46,8 +48,10 @@ export default function CandidateDashboard() {
   try {
     const res = await axios.post(`${API_URL}/candidates/add`, candidate);
     return res.data;
-  } catch (err: any) {
-    const message = err.response?.data?.detail || err.message || "An unknown error occurred";
+  } catch (err) {
+    const error = err as AxiosError<{ detail?: string }>;
+
+    const message = error.response?.data?.detail || error.message || "An unknown error occurred";
     throw new Error(message); // 👉 Cho catch ở ngoài xử lý
   }
 };
@@ -57,8 +61,10 @@ export default function CandidateDashboard() {
   try {
     const res = await axios.put(`${API_URL}/candidates/${candidate.id}`, candidate);
     return res.data;
-  } catch (err: any) {
-      const message = err.response?.data?.detail || err.message || "An unknown error occurred";
+  } catch (err) {
+      const error = err as AxiosError<{ detail?: string }>;
+
+      const message = error.response?.data?.detail || error.message || "An unknown error occurred";
       throw new Error(message); // 👉 Ném lỗi để xử lý bên ngoài
 
   }
@@ -68,8 +74,10 @@ export default function CandidateDashboard() {
   const deleteCandidateFromDB = async (id: number): Promise<void> => {
     try {
       await axios.delete(`${API_URL}/candidates/delete/${id}`);
-    } catch (err: any) {
-      const message = err.response?.data?.detail || err.message || "An unknown error occurred";
+    } catch (err) {
+      const error = err as AxiosError<{ detail?: string }>;
+
+      const message = error.response?.data?.detail || error.message || "An unknown error occurred";
       throw new Error(message);
     }
   };
@@ -105,7 +113,7 @@ export default function CandidateDashboard() {
       setShowDialog(true);
       setDialogConfirmAction(() => {});
       setDialogVariant("information");
-    } catch (error: any) {
+    } catch (_) {
 
     } finally {
       
@@ -122,7 +130,9 @@ export default function CandidateDashboard() {
     setDialogVariant("information");
     setDialogTitle("Success");
     setDialogDescription("Candidate deleted successfully!");
-  } catch (error: any) {
+  } catch (err) {
+    const error = err as AxiosError<{ detail?: string }>;
+
     setDialogVariant("error");
     setDialogTitle("Error");
     setDialogDescription(error.message || "Failed to delete candidate.");

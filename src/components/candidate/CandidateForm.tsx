@@ -1,5 +1,23 @@
 'use client';
 import React from 'react';
+type CandidateFormData = {
+  type: 'Applicant' | 'Employee' | 'Intern';
+  name: string;
+  position: string;
+  phone_number: string;
+  email: string;
+  dob: string;
+  application_date: string;
+  interview_date: string;
+  interview_time: string;
+  source: string;
+  status: string;
+  interviewer: string;
+  experience: string;
+  skills: string;
+  feedback: string;
+  notes: string;
+};
 
 type InputProps = {
   label: string;
@@ -26,7 +44,7 @@ type SelectProps = {
 
 
 type Props = {
-  form: any;
+  form: CandidateFormData;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement| HTMLSelectElement>) => void;
   onTypeChange: (type: string) => void;
 };
