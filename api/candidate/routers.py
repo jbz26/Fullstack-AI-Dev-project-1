@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from api.database import get_db
-from api.candidate.crud import create_candidate, delete_candidate
-from api.candidate.schemas import CandidateCreate, CandidateResponse, CandidateWithHR
+from database import get_db
+from candidate.crud import create_candidate, delete_candidate
+from candidate.schemas import CandidateCreate, CandidateResponse, CandidateWithHR
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
-from api.auth.jwt import get_current_user
-from api.auth.schemas import UserResponse
-from api.candidate.models import Candidate
+from auth.jwt import get_current_user
+from auth.schemas import UserResponse
+from candidate.models import Candidate
 router = APIRouter( tags=["Candidates"])
 
 @router.post(

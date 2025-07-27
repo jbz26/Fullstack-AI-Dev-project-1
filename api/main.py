@@ -3,14 +3,14 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from api.database import engine
-from api.models.base import Base
-from api.auth.models import User
-from api.candidate.models import Candidate
-from api.auth.routes.auth_router import router as auth_router
-from api.auth.routes.oauth_router import router as oauth_router
-from api.auth.routes.data_router import router as database_router
-from api.candidate.routers import router as candidate_router
+from database import engine
+from models.base import Base
+from auth.models import User
+from candidate.models import Candidate
+from auth.routes.auth_router import router as auth_router
+from auth.routes.oauth_router import router as oauth_router
+from auth.routes.data_router import router as database_router
+from candidate.routers import router as candidate_router
 
 from dotenv import load_dotenv
 import os

@@ -4,8 +4,8 @@ from jose import JWTError, jwt
 import os
 from fastapi import Depends , HTTPException , status
 from sqlalchemy.orm import Session
-from api.auth.models import User
-from api.database import get_db
+from auth.models import User
+from database import get_db
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv()

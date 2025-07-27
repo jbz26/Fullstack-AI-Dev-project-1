@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey
 from sqlalchemy.orm import relationship
-from api.models.base import Base
+from models.base import Base
 from sqlalchemy.types import Enum as SQLAlchemyEnum
-from api.candidate.schemas import CandidateType  # Hoặc import Enum từ nơi khai báo
+from candidate.schemas import CandidateType  # Hoặc import Enum từ nơi khai báo
 
 
 class Candidate(Base):

@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
-from api.auth.models import User
+from auth.models import User
 from sqlalchemy.orm import Session
 
 load_dotenv()

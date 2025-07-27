@@ -1,7 +1,7 @@
 # crud.py
 from sqlalchemy.orm import Session
-from api.candidate.models import Candidate
-from api.candidate.schemas import CandidateCreate
+from candidate.models import Candidate
+from candidate.schemas import CandidateCreate
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 def create_candidate(db: Session, candidate_data: CandidateCreate):
