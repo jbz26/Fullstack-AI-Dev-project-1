@@ -1,15 +1,10 @@
 'use client';
 
-import { useState , useEffect } from 'react';
+import {  useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
-import axios  from '@/utils/axiosInstance';
 
 export default function HomePage() {
-  const [form, setForm] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
   const API_URL = process.env.NEXT_PUBLIC_API_URL!;
   useEffect(() => {
     const fetchUser = async () => {
@@ -18,14 +13,7 @@ export default function HomePage() {
 
       if (user && access_token) {
         try {
-          const res = await  fetch (`${API_URL}/data/user`)
-          const data = await res.json();
-          const user = {
-            email: data.email,
-            fullName: data.full_name,
-            id: data.id,
-            avatar: `https://i.pravatar.cc/150?u=${data.email}`,
-          };
+         await  fetch (`${API_URL}/data/user`)
           
           router.replace('/dashboard');
         } catch (err) {
@@ -38,7 +26,8 @@ export default function HomePage() {
     };
 
     fetchUser();
-  }, []); 
+  }, [router, API_URL]);
+
 
   
 

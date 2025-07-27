@@ -1,10 +1,9 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import SessionExpiredDialog from '@/components/dialog/SessionExpiredDialog';
 import GenericDialog from '@/components/dialog/GenericDialog';
 
-const SessionExpiredContext = createContext({});
 
 export function SessionExpiredProvider({ children }: { children: React.ReactNode }) {
   const [isExpired, setIsExpired] = useState(false);

@@ -40,7 +40,7 @@ export default function CandidateDashboard() {
 
       const data = await res.data;
       setCandidates(data);
-    } catch (err) {
+    } catch (_) {
     }
   };
 
@@ -158,13 +158,12 @@ export default function CandidateDashboard() {
   useEffect(() => {
     const init = async () => {
       const user = localStorage.getItem('user');
-      const access_token = localStorage.getItem('access_token');
       if (!user) {
         router.replace('/auth/login');
       } else {
         loadCandidates();
       }
-    };
+    }
 
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === 'user' && event.newValue === null) {
@@ -177,7 +176,7 @@ export default function CandidateDashboard() {
     init();
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [router]);
+  }, [router, loadCandidates]);
 
 
   // ===================== UI =====================

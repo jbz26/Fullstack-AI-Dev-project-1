@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser } from '@/contexts/UserContext'
 import { handleGoogleSignup } from '../google/google_signup';
 import axios from '@/utils/axiosInstance';
 import GenericDialog from '@/components/dialog/GenericDialog'
@@ -66,7 +65,7 @@ export default function LoginPage() {
       localStorage.setItem('user', JSON.stringify(data.user))
 
       await fetchUserData()
-    } catch (err) {
+    } catch (_) {
 
       setDialogTitle('Login Failed')
       setDialogDescription('Invalid email or password. Please try again.')

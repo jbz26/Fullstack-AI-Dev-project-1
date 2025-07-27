@@ -7,24 +7,42 @@ const getToday = () => new Date().toISOString().split('T')[0];         // YYYY-M
 const getNowTime = () => new Date().toISOString().slice(11, 16);       // HH:MM
 import MissingFieldsDialog from '@/components/dialog/MissingFieldsDialog';
 export default function AddCandidateForm({ onSubmit }: { onSubmit: (c: Candidate) => void }) {
-  const [form, setForm] = useState({
-    type: 'Applicant',
-    name: '',
-    dob: getToday(),
-    email: '',
-    phone_number: '',
-    position: '',
-    experience: '',
-    skills: '',
-    status: '',
-    source: '',
-    application_date: getToday(),
-    interview_date: getToday(),
-    interview_time: getNowTime(),
-    interviewer: '',
-    feedback: '',
-    notes: '',
-  });
+  const [form, setForm] = useState<{
+  type: CandidateType;
+  name: string;
+  dob: string;
+  email: string;
+  phone_number: string;
+  position: string;
+  experience: string;
+  skills: string;
+  status: string;
+  source: string;
+  application_date: string;
+  interview_date: string;
+  interview_time: string;
+  interviewer: string;
+  feedback: string;
+  notes: string;
+}>({
+  type: 'Applicant',
+  name: '',
+  dob: getToday(),
+  email: '',
+  phone_number: '',
+  position: '',
+  experience: '',
+  skills: '',
+  status: '',
+  source: '',
+  application_date: getToday(),
+  interview_date: getToday(),
+  interview_time: getNowTime(),
+  interviewer: '',
+  feedback: '',
+  notes: '',
+});
+
 
   const [showDialog, setShowDialog] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -35,8 +53,11 @@ export default function AddCandidateForm({ onSubmit }: { onSubmit: (c: Candidate
   };
 
   const handleTypeChange = (type: string) => {
-    setForm(prev => ({ ...prev, type }));
+    setForm(prev => ({ ...prev, type: type as CandidateType }));
   };
+
+
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,14 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
 import { handleGoogleSignup } from '../google/google_signup';
-import { useUser } from '@/contexts/UserContext';
 import GenericDialog from '@/components/dialog/GenericDialog';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [dialogConfirmAction, setDialogConfirmAction] = useState<() => void>(() => () => {});
@@ -35,9 +32,6 @@ export default function RegisterPage() {
     setMounted(true);
   }, []);
 
-  const handleDialogClose = () => {
-    setShowDialog(false);
-  }
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };

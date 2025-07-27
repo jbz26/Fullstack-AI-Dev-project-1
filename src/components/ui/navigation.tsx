@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useRouter } from 'next/navigation';
 import { useUser } from "@/contexts/UserContext";
+import Image from 'next/image';
 
 function Navbar() {
   const { theme, setTheme, systemTheme } = useTheme();
@@ -38,7 +39,7 @@ function Navbar() {
             >
               
               <span>{user.full_name}</span>
-              <img
+              <Image
                 src={user.avatar}
                 alt="avatar"
                 className="w-8 h-8 rounded-full border"

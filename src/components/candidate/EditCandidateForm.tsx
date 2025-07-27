@@ -13,7 +13,7 @@ export default function EditCandidateForm({
   onSubmit: (c: Candidate) => void;
 }) {
   const [form, setForm] = useState({
-    type: 'Applicant',
+    type: 'Applicant' as CandidateType,
     name: '',
     dob: '',
     email: '',
@@ -55,13 +55,15 @@ export default function EditCandidateForm({
     }
   }, [candidate]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement|HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleTypeChange = (type: string) => {
-    setForm(prev => ({ ...prev, type }));
+    setForm(prev => ({ ...prev, type: type as CandidateType }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
