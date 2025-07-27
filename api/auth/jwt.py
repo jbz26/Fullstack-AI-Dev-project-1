@@ -36,7 +36,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         id = payload.get("sub")
-        print(f"Decoded token payload: {payload}")
         if id is None:
             raise credentials_exception
         user = db.query(User).filter(User.id == id).first()

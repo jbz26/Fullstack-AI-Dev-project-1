@@ -80,7 +80,8 @@ async def auth_google_callback(request: Request, db: Session = Depends(get_db)):
             email=email,
             full_name=full_name,
             provider="google",
-            google_id=google_id
+            google_id=google_id,
+            avatar=f"https://i.pravatar.cc/150?u={email}"
         )
         db.add(user)
         db.commit()

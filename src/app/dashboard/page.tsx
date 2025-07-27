@@ -12,129 +12,126 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import axios from '@/utils/axiosInstance';
+import GenericDialog from '@/components/dialog/GenericDialog';
 
 export default function CandidateDashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
   const router = useRouter();
-
   const API_URL = process.env.NEXT_PUBLIC_API_URL!;
   const access_token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogConfirmAction, setDialogConfirmAction] = useState<() => void>(() => () => {});
+
+  const [dialogTitle, setDialogTitle] = useState('');
+  const [dialogDescription, setDialogDescription] = useState('');
+  const [dialogVariant, setDialogVariant] = useState<'information' | 'warning' | 'error'>('information');
+
 
   // ===================== DB Actions =====================
 
   const loadCandidates = async () => {
-    if (!access_token) {
-      router.replace('/auth/login');
-      return;
-    }
-
     try {
-      const res = await fetch(`${API_URL}/candidates/get_all`, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      });
+      const res = await axios.get(`${API_URL}/candidates/get_all`)
 
-      if (!res.ok) throw new Error('Failed to fetch candidates');
-
-      const data = await res.json();
+      const data = await res.data;
       setCandidates(data);
     } catch (err) {
-      console.error('Error loading candidates:', err);
     }
   };
 
   const addCandidateToDB = async (candidate: Candidate): Promise<Candidate | null> => {
-    try {
-      const res = await fetch(`${API_URL}/candidates/add`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(candidate),
-      });
+  try {
+    const res = await axios.post(`${API_URL}/candidates/add`, candidate);
+    return res.data;
+  } catch (err: any) {
+    const message = err.response?.data?.detail || err.message || "An unknown error occurred";
+    throw new Error(message); // 👉 Cho catch ở ngoài xử lý
+  }
+};
 
-      if (!res.ok) throw new Error('Failed to add candidate');
-      return await res.json();
-    } catch (err) {
-      console.error('Error adding candidate:', err);
-      return null;
-    }
-  };
 
   const updateCandidateInDB = async (candidate: Candidate): Promise<Candidate | null> => {
-    try {
-      const res = await fetch(`${API_URL}/candidates/update/${candidate.id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(candidate),
-      });
+  try {
+    const res = await axios.put(`${API_URL}/candidates/${candidate.id}`, candidate);
+    return res.data;
+  } catch (err: any) {
+      const message = err.response?.data?.detail || err.message || "An unknown error occurred";
+      throw new Error(message); // 👉 Ném lỗi để xử lý bên ngoài
 
-      if (!res.ok) throw new Error('Failed to update candidate');
-      return await res.json();
-    } catch (err) {
-      console.error('Error updating candidate:', err);
-      return null;
+  }
+};
+
+
+  const deleteCandidateFromDB = async (id: number): Promise<void> => {
+    try {
+      await axios.delete(`${API_URL}/candidates/delete/${id}`);
+    } catch (err: any) {
+      const message = err.response?.data?.detail || err.message || "An unknown error occurred";
+      throw new Error(message);
     }
   };
 
-  const deleteCandidateFromDB = async (id: number) => {
-    try {
-      const res = await fetch(`${API_URL}/candidates/delete/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!res.ok) throw new Error('Failed to delete candidate');
-    } catch (err) {
-      console.error('Error deleting candidate:', err);
-    }
-  };
 
   // ===================== UI Handlers =====================
 
   const handleAddOrUpdateCandidate = async (candidate: Candidate) => {
     if (!access_token) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
       router.replace('/auth/login');
+
       return;
     }
 
     let result: Candidate | null = null;
 
-    if (editingCandidate) {
-      result = await updateCandidateInDB(candidate);
-      if (result) {
+    try {
+      if (editingCandidate) {
+        result = await updateCandidateInDB(candidate);
         setCandidates(prev =>
           prev.map(c => (c.id === result!.id ? result! : c))
         );
+        setDialogTitle("Success");
+        setDialogDescription("Candidate updated successfully!");
+      } else {
+        result = await addCandidateToDB(candidate);
+        setCandidates(prev => [...prev, result!]);
+        setDialogTitle("Success");
+        setDialogDescription("Candidate added successfully!");
       }
-    } else {
-      result = await addCandidateToDB(candidate);
-      if (result !== null) {
-        setCandidates(prev => [...prev, result as Candidate]);
-      }
+      setShowDialog(true);
+      setDialogConfirmAction(() => {});
+      setDialogVariant("information");
+    } catch (error: any) {
+
+    } finally {
+      
+      setModalOpen(false);
+      setEditingCandidate(null);
     }
 
-    setModalOpen(false);
-    setEditingCandidate(null);
   };
 
-  const handleDeleteCandidate = (index: number) => {
-    const candidate = candidates[index];
-    if (!candidate) return;
+  const handleDeleteCandidate = async (id: number) => {
+  try {
+    await deleteCandidateFromDB(id);
+    setCandidates(prev => prev.filter(c => c.id !== id));
+    setDialogVariant("information");
+    setDialogTitle("Success");
+    setDialogDescription("Candidate deleted successfully!");
+  } catch (error: any) {
+    setDialogVariant("error");
+    setDialogTitle("Error");
+    setDialogDescription(error.message || "Failed to delete candidate.");
+  } finally {
+    setDialogConfirmAction(() => {});
+    setShowDialog(true);
+  }
+};
 
-    deleteCandidateFromDB(candidate.id !);
-    setCandidates(prev => prev.filter((_, i) => i !== index));
-  };
 
   const handleEditCandidate = (candidate: Candidate) => {
     setEditingCandidate(candidate);
@@ -151,6 +148,7 @@ export default function CandidateDashboard() {
   useEffect(() => {
     const init = async () => {
       const user = localStorage.getItem('user');
+      const access_token = localStorage.getItem('access_token');
       if (!user) {
         router.replace('/auth/login');
       } else {
@@ -160,6 +158,8 @@ export default function CandidateDashboard() {
 
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === 'user' && event.newValue === null) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
         router.replace('/auth/login');
       }
     };
@@ -169,9 +169,11 @@ export default function CandidateDashboard() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [router]);
 
+
   // ===================== UI =====================
 
   return (
+    <>
     <div className="min-h-screen bg-white dark:bg-[#0f0f0f] text-black dark:text-white px-6 py-8 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -212,5 +214,15 @@ export default function CandidateDashboard() {
         </Dialog>
       </div>
     </div>
+     <GenericDialog
+            variant={dialogVariant}
+            title={dialogTitle}
+            description={dialogDescription}
+            open={showDialog}
+            onClose={() => setShowDialog(false)}
+            onConfirm={dialogConfirmAction} // 👈 thực thi hành động khi OK
+            
+          />
+    </>
   );
 }

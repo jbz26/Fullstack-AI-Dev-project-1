@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from api.database import get_db
 from api.candidate.crud import create_candidate, delete_candidate
-from api.candidate.schemas import CandidateCreate, CandidateResponse
+from api.candidate.schemas import CandidateCreate, CandidateResponse, CandidateWithHR
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from api.auth.jwt import get_current_user
@@ -49,7 +49,8 @@ Dữ liệu bắt buộc: `type`, `name`, `hr_id`.
     }
 )
 def add_candidate(candidate: CandidateCreate, db: Session = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
-    return create_candidate(db, candidate)
+    candidate_with_hr = CandidateWithHR(**candidate.model_dump(), hr_id=current_user.id)
+    return create_candidate(db, candidate_with_hr)
 
 
 @router.delete(
@@ -90,9 +91,7 @@ def remove_candidate(
     - **db**: phiên làm việc với cơ sở dữ liệu
     - **current_user**: người dùng hiện tại (đã xác thực)
     """
-    success = delete_candidate(db, candidate_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Candidate not found")
+    delete_candidate(db, candidate_id)
     return {"message": "Candidate deleted successfully"}
 
 @router.get(
@@ -208,11 +207,23 @@ def get_all_candidates(db: Session = Depends(get_db), current_user: UserResponse
     - **db**: phiên làm việc với cơ sở dữ liệu
     - **current_user**: người dùng hiện tại (đã xác thực)
     """
-    print("Fetching candidates for HR ID:", current_user.id)
     candidates = db.query(Candidate).filter(Candidate.hr_id == current_user.id).all()
-    print(f"Found {len(candidates)} candidates for HR ID: {current_user.id}")
     if not candidates:
-        raise HTTPException(status_code=404, detail="No candidates found for this HR")
+        return []
     # Lọc ứng viên theo HR ID của người dùng hiện tại
     # ✅ Đảm bảo chỉ lấy ứng viên của HR hiện tại   
     return candidates
+
+
+@router.put("/{candidate_id}", response_model=CandidateResponse, summary="Cập nhật thông tin ứng viên")
+def update_candidate(candidate_id: int, candidate_data: CandidateWithHR, db: Session = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
+    candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+
+    for field, value in candidate_data.model_dump(exclude_unset=True).items():
+        setattr(candidate, field, value)
+
+    db.commit()
+    db.refresh(candidate)
+    return candidate

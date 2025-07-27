@@ -37,7 +37,7 @@ function Navbar() {
               onClick={() => setShowDropdown((prev) => !prev)}
             >
               
-              <span>{user.fullName}</span>
+              <span>{user.full_name}</span>
               <img
                 src={user.avatar}
                 alt="avatar"

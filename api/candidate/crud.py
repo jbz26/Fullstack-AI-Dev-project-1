@@ -20,10 +20,12 @@ def create_candidate(db: Session, candidate_data: CandidateCreate):
         db.rollback()
         raise HTTPException(status_code=400, detail="Candidate creation failed due to unique constraint")
 
+
 def delete_candidate(db: Session, candidate_id: int):
     candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
     if candidate:
         db.delete(candidate)
         db.commit()
-        return True
-    return False
+        return {"detail": "Candidate deleted successfully"}
+    else:
+        raise HTTPException(status_code=404, detail="Candidate not found")

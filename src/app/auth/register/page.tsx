@@ -1,22 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { handleGoogleSignup } from '../google/google_signup';
 import { useUser } from '@/contexts/UserContext';
+import GenericDialog from '@/components/dialog/GenericDialog';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { setUser } = useUser();
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogConfirmAction, setDialogConfirmAction] = useState<() => void>(() => () => {});
+
+  const [dialogTitle, setDialogTitle] = useState('');
+  const [dialogDescription, setDialogDescription] = useState('');
+  const [dialogVariant, setDialogVariant] = useState<'information' | 'warning' | 'error'>('information');
+
   
-  type FormField = 'fullName' | 'username' | 'email' | 'password';
+  type FormField = 'full_name' | 'user_name' | 'email' | 'password';
   const [form, setForm] = useState({
-    fullName: '',
-    username: '',
+    full_name: '',
+    user_name: '',
     location: '',
     email: '',
     password: '',
@@ -29,12 +35,24 @@ export default function RegisterPage() {
     setMounted(true);
   }, []);
 
+  const handleDialogClose = () => {
+    setShowDialog(false);
+  }
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.full_name || !form.user_name || !form.email || !form.password) {
+      setDialogTitle('Missing Information');
+      setDialogDescription('Please fill in all fields.');
+      setDialogVariant('warning');
+      setDialogConfirmAction(() => () => {setShowDialog(false)});
+      setShowDialog(true);
+
+      return;
+    }
     try {
       const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -45,22 +63,35 @@ export default function RegisterPage() {
       });
 
       if (!res.ok) {
-        throw new Error('Registration failed');
+          if (res.status === 400) {
+            const errorData = await res.json();
+            window.dispatchEvent(new CustomEvent('400-error', { detail: errorData.detail }));
+          }
+          return;
       }
-
-      alert('Registration successful! Please log in.');
-      router.push('/auth/login');
+      setDialogTitle('Registration Successful');
+      setDialogDescription('You have successfully registered. Please log in to continue.');
+      setDialogVariant('information');
+      setDialogConfirmAction(() => () => {
+        router.push('/auth/login');
+      });
+      setShowDialog(true);
+      
+      
     } catch (error) {
       console.error('Error during registration:', error);
-      alert('An error occurred during registration. Please try again.');
+      setDialogTitle('Registration Failed');
+      setDialogDescription('There was an error processing your registration. Please try again later.');
+      setDialogVariant('error');
+      setShowDialog(true);
     }
 
-    router.push('/login');
+   
   };
 
   if (!mounted) return null;
-  const isDark = theme === 'dark';
   return (
+    <>
     <div className="min-h-screen bg-white dark:bg-[#0f0f0f] flex items-center justify-center px-4 transition-colors duration-300">
       <form
         onSubmit={handleSubmit}
@@ -82,8 +113,8 @@ export default function RegisterPage() {
 
         <div className="space-y-4">
           {[
-            { label: 'Full Name', name: 'fullName', type: 'text', placeholder: 'Enter your full name' },
-            { label: 'Username', name: 'username', type: 'text', placeholder: 'Choose a username' },
+            { label: 'Full Name', name: 'full_name', type: 'text', placeholder: 'Enter your full name' },
+            { label: 'Username', name: 'user_name', type: 'text', placeholder: 'Choose a username' },
             { label: 'Email', name: 'email', type: 'email', placeholder: 'Your email' },
             { label: 'Password', name: 'password', type: 'password', placeholder: 'Create a password' },
           ].map((field) => (
@@ -125,7 +156,7 @@ export default function RegisterPage() {
 
         <button
           type="button"
-          onClick={() => handleGoogleSignup({ API_URL, setUser, router })}
+          onClick={() => handleGoogleSignup({ API_URL, router })}
           className="w-full py-2 bg-white text-black rounded-xl border hover:bg-gray-200"
         >
           Sign up with Google
@@ -147,5 +178,15 @@ export default function RegisterPage() {
         </button>
       </form>
     </div>
+    <GenericDialog
+        variant={dialogVariant}
+        title={dialogTitle}
+        description={dialogDescription}
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        onConfirm={dialogConfirmAction} // 👈 thực thi hành động khi OK
+        
+      />
+    </>
   );
 }

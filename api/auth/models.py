@@ -14,4 +14,5 @@ class User(Base):
     provider = Column(String, default="local")
     google_id = Column(String, nullable=True)
     candidates = relationship("Candidate", back_populates="hr")  # ← đây là chiều ngược lại
+    avatar = Column(String, nullable=True)  # Thêm trường avatar nếu cần
 

@@ -14,6 +14,7 @@ def get_user_method(current_user: User = Depends(get_current_user), db: Session 
     """
     print(f"Fetching data for user: {current_user.id}")
     user_data = get_user_data(current_user.id, db)
+    print(f"User data fetched: {user_data}")
     if not user_data:
         raise HTTPException(status_code=404, detail="User not found")
     

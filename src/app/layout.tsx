@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import Navbar from '@/components/ui/navigation';
 import './globals.css';
 import { UserProvider } from '@/contexts/UserContext'; // ⬅️ import context
+import { SessionExpiredProvider } from '@/contexts/SessionExpiredContext';
 
 
 const geistSans = Geist({
@@ -31,12 +32,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <UserProvider>
-          <div className="bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen transition-colors duration-300">
-           <Navbar />
-            <main>{children}</main>
-          </div>
-          </UserProvider>
+          <SessionExpiredProvider>
+           <UserProvider>           
+            <div className="bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen transition-colors duration-300">
+            <Navbar />
+              <main>{children}</main>
+            </div>
+            </UserProvider>
+          </SessionExpiredProvider>
         </ThemeProvider>
       </body>
     </html>

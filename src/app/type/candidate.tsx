@@ -20,5 +20,5 @@ export type Candidate = {
   interviewer?: string;
   feedback?: string;
   notes?: string;
-  hr_id: number;
+  hr_id?: number;
 };

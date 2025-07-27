@@ -10,19 +10,22 @@ class Candidate(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     type = Column(SQLAlchemyEnum(CandidateType), default=CandidateType.Applicant)
-
     name = Column(String, nullable=False)
-    application_date = Column(Date)
-    position = Column(String)
+    dob = Column(Date)  # ✅ thêm ngày sinh
     email = Column(String, unique=True, index=True)
     phone_number = Column(String)
+    position = Column(String)
+    experience = Column(String)  # ✅ thêm kinh nghiệm
+    skills = Column(String)      # ✅ thêm kỹ năng
     status = Column(String)
     source = Column(String)
+    application_date = Column(Date)
     interview_date = Column(Date)
     interview_time = Column(Time)
     interviewer = Column(String)
     feedback = Column(String)
     notes = Column(String)
-    hr_id = Column(Integer, ForeignKey("users.id"))  # ✅ khóa ngoại
-    hr = relationship("User", back_populates="candidates")  # ORM relation
+    hr_id = Column(Integer, ForeignKey("users.id"))  # khóa ngoại
+    hr = relationship("User", back_populates="candidates")
+
 

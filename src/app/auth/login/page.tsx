@@ -4,13 +4,20 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/contexts/UserContext'
 import { handleGoogleSignup } from '../google/google_signup';
+import axios from '@/utils/axiosInstance';
+import GenericDialog from '@/components/dialog/GenericDialog'
 
 export default function LoginPage() {
   const router = useRouter()
   const [form, setForm] = useState({ email: '', password: '' })
   const [mounted, setMounted] = useState(false)
-  const { setUser } = useUser()
   const API_URL = process.env.NEXT_PUBLIC_API_URL!
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogConfirmAction, setDialogConfirmAction] = useState<() => void>(() => () => {});
+
+  const [dialogTitle, setDialogTitle] = useState('');
+  const [dialogDescription, setDialogDescription] = useState('');
+  const [dialogVariant, setDialogVariant] = useState<'information' | 'warning' | 'error'>('information');
 
   useEffect(() => {
     setMounted(true)
@@ -18,27 +25,29 @@ export default function LoginPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
-  const fetchUserData = async (token: string) => {
-    const res = await fetch(`${API_URL}/data/user`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (!res.ok) throw new Error('Lỗi lấy thông tin người dùng')
-
-    const data = await res.json()
-
-    const user = {
-      email: data.email,
-      fullName: data.full_name,
-      id: data.id,
-      avatar: `https://i.pravatar.cc/150?u=${data.email}`,
+  const fetchUserData = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/data/user`)
+      const data = await res.data
+      const user = {
+        email: data.email,
+        fullName: data.full_name,
+        id: data.id,
+        avatar: `https://i.pravatar.cc/150?u=${data.email}`,
+      }
+      localStorage.setItem('user', JSON.stringify(user))
+      window.dispatchEvent(new Event('storage')) // Trigger storage event for other tabs
+      setDialogTitle('Login Successful')
+      setDialogDescription('You have successfully logged in.')
+      setDialogVariant('information')
+      setDialogConfirmAction(() => () => {
+      router.replace('/dashboard')
+      });
+      setShowDialog(true)
+    } catch (err) {
+      console.error(err)
+      alert('Failed to fetch user data. Please try again.')
     }
-
-    setUser(user)
-    router.replace('/dashboard')
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -53,20 +62,26 @@ export default function LoginPage() {
 
       const data = await res.json()
       if (!res.ok) throw new Error(data.detail || 'Lỗi đăng nhập')
+      localStorage.setItem('access_token', data.access_token)
+      localStorage.setItem('user', JSON.stringify(data.user))
 
-      const token = data.access_token
-      localStorage.setItem('access_token', token)
-
-      await fetchUserData(token)
+      await fetchUserData()
     } catch (err) {
-      console.error(err)
-      alert('Đăng nhập thất bại')
+
+      setDialogTitle('Login Failed')
+      setDialogDescription('Invalid email or password. Please try again.')
+      setDialogVariant('error')
+      setDialogConfirmAction(() => () => {
+        setShowDialog(false)
+      });
+      setShowDialog(true)
     }
   }
 
   if (!mounted) return null
 
   return (
+    <>
     <div className="min-h-screen bg-white dark:bg-[#0f0f0f] flex items-center justify-center px-4 transition-colors duration-300">
       <form
         onSubmit={handleLogin}
@@ -111,7 +126,7 @@ export default function LoginPage() {
 
         <button
           type="button"
-          onClick={() => handleGoogleSignup({ API_URL, setUser, router })}
+          onClick={() => handleGoogleSignup({ API_URL, router })}
           className="w-full py-2 rounded-xl border bg-gray-200 text-black hover:bg-gray-300 dark:bg-white dark:hover:bg-gray-200"
         >
           Sign in with Google
@@ -133,5 +148,15 @@ export default function LoginPage() {
         </button>
       </form>
     </div>
+    <GenericDialog
+        title={dialogTitle}
+        description={dialogDescription}
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        variant={dialogVariant}
+        buttonLabel="OK"
+        onConfirm={dialogConfirmAction} // 👈 thực thi hành động khi OK
+      />
+    </>
   )
 }

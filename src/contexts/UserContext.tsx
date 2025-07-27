@@ -1,47 +1,47 @@
-// context/UserContext.tsx
 import { createContext, useContext, useEffect, useState } from "react";
 
 type User = {
-  fullName: string;
+  full_name: string;
   avatar: string;
-  id: number; 
+  id: number;
   email: string;
 };
 
 type UserContextType = {
   user: User | null;
-  setUser: (user: User | null) => void;
   logout: () => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUserState] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
+  // Tự động cập nhật khi localStorage thay đổi
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUserState(JSON.parse(storedUser));
-    }
+    const syncUserFromLocalStorage = () => {
+      const storedUser = localStorage.getItem("user");
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+    };
+
+    syncUserFromLocalStorage(); // Khởi tạo ban đầu
+
+    // Lắng nghe sự kiện "storage" khi localStorage thay đổi từ tab khác
+    window.addEventListener("storage", syncUserFromLocalStorage);
+
+    return () => {
+      window.removeEventListener("storage", syncUserFromLocalStorage);
+    };
   }, []);
 
-  const setUser = (newUser: User | null) => {
-    if (newUser) {
-      localStorage.setItem("user", JSON.stringify(newUser));
-    } else {
-      localStorage.removeItem("user");
-    }
-    setUserState(newUser);
-  };
-
   const logout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("access_token");
     setUser(null);
-    localStorage.removeItem("access_token"); // Xóa access token khi logout
   };
 
   return (
-    <UserContext.Provider value={{ user, setUser, logout }}>
+    <UserContext.Provider value={{ user, logout }}>
       {children}
     </UserContext.Provider>
   );

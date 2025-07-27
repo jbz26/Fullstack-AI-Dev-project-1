@@ -1,12 +1,10 @@
 // lib/auth/googleSignup.ts
-
+import axios from '@/utils/axiosInstance';
 export const handleGoogleSignup = async ({
   API_URL,
-  setUser,
   router,
 }: {
   API_URL: string;
-  setUser?: (user: any) => void;
   router: any;
 }) => {
   const popup = window.open(
@@ -29,33 +27,15 @@ export const handleGoogleSignup = async ({
       localStorage.setItem('access_token', access_token);
 
       try {
-        const userRes = await fetch(`${API_URL}/data/user`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
+        const userRes = await axios.get(`${API_URL}/data/user`, {withCredentials: true});
 
-        if (!userRes.ok) {
-          throw new Error('Lỗi khi lấy thông tin người dùng từ Google');
-        }
 
-        const userData = await userRes.json();
+        const userData = await userRes.data;
 
-        const user = {
-          email: userData.email,
-          fullName: userData.full_name,
-          id: userData.id,
-          avatar: `https://i.pravatar.cc/150?u=${userData.email}`,
-        };
-
-        if (typeof setUser === 'function') {
-          setUser(user);
-        }
-
+        localStorage.setItem('user', JSON.stringify(userData));
+        window.dispatchEvent(new Event('storage'))
         router.replace('/dashboard');
+
       } catch (err) {
         console.error('Lỗi khi đăng ký bằng Google:', err);
         alert('Đăng ký bằng Google thất bại.');

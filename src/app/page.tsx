@@ -3,14 +3,13 @@
 import { useState , useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { useUser } from '@/contexts/UserContext'
+import axios  from '@/utils/axiosInstance';
 
 export default function HomePage() {
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const { setUser } = useUser();
   const API_URL = process.env.NEXT_PUBLIC_API_URL!;
   useEffect(() => {
     const fetchUser = async () => {
@@ -19,15 +18,7 @@ export default function HomePage() {
 
       if (user && access_token) {
         try {
-          const res = await fetch(`${API_URL}/data/user`, {
-            headers: {
-              Authorization: `Bearer ${access_token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (!res.ok) throw new Error('Lỗi lấy thông tin người dùng');
-
+          const res = await  fetch (`${API_URL}/data/user`)
           const data = await res.json();
           const user = {
             email: data.email,
@@ -35,7 +26,7 @@ export default function HomePage() {
             id: data.id,
             avatar: `https://i.pravatar.cc/150?u=${data.email}`,
           };
-          setUser(user);
+          
           router.replace('/dashboard');
         } catch (err) {
           console.error(err);
@@ -43,7 +34,6 @@ export default function HomePage() {
       } else {
         localStorage.removeItem('user');
         localStorage.removeItem('access_token');
-        setUser(null);
       }
     };
 
