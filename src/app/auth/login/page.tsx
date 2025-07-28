@@ -10,7 +10,8 @@ export default function LoginPage() {
   const router = useRouter()
   const [form, setForm] = useState({ email: '', password: '' })
   const [mounted, setMounted] = useState(false)
-  const API_URL = process.env.NEXT_PUBLIC_API_URL!
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
+  console.log(API_URL)
   const [showDialog, setShowDialog] = useState(false);
   const [dialogConfirmAction, setDialogConfirmAction] = useState<() => void>(() => () => {});
 
@@ -125,7 +126,8 @@ export default function LoginPage() {
 
         <button
           type="button"
-          onClick={() => handleGoogleSignup({ API_URL, router })}
+          onClick={() => handleGoogleSignup({ API_URL: API_URL as string, router })}
+
           className="w-full py-2 rounded-xl border bg-gray-200 text-black hover:bg-gray-300 dark:bg-white dark:hover:bg-gray-200"
         >
           Sign in with Google

@@ -25,7 +25,7 @@ export default function RegisterPage() {
     password: '',
   });
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 
   useEffect(() => {
@@ -150,7 +150,8 @@ export default function RegisterPage() {
 
         <button
           type="button"
-          onClick={() => handleGoogleSignup({ API_URL, router })}
+          onClick={() => handleGoogleSignup({ API_URL: API_URL as string, router })}
+
           className="w-full py-2 bg-white text-black rounded-xl border hover:bg-gray-200"
         >
           Sign up with Google
