@@ -125,6 +125,8 @@ export default function CandidateDashboard() {
 
   const handleDeleteCandidate = async (id: number) => {
   try {
+    console.log(id)
+    console.log(candidates)
     await deleteCandidateFromDB(id);
     setCandidates(prev => prev.filter(c => c.id !== id));
     setDialogVariant("information");
@@ -176,7 +178,7 @@ export default function CandidateDashboard() {
     init();
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [router, loadCandidates]);
+  }, [router]);
 
 
   // ===================== UI =====================

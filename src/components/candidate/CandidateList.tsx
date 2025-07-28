@@ -8,7 +8,7 @@ import CandidateModal from "@/components/candidate/CandidateModal";
 type CandidateListProps = {
   candidates: Candidate[];
   onEdit?: (candidate: Candidate) => void;
-  onDelete?: (index: number) => void;
+  onDelete?: (id: number) => void;
 };
 
 export default function CandidateList({ candidates, onEdit, onDelete }: CandidateListProps) {
@@ -16,13 +16,13 @@ export default function CandidateList({ candidates, onEdit, onDelete }: Candidat
 
   return (
     <div className="space-y-4 mt-6 px-4">
-      {candidates.map((c, i) => (
+      {candidates.map((candidate) => (
         <CandidateCard
-          key={i}
-          candidate={c}
+          key={candidate.id}
+          candidate={candidate}
           onView={setSelected}
           onEdit={onEdit}
-          onDelete={() => onDelete?.(i)}
+          onDelete={() => onDelete?.(candidate.id!)}
         />
       ))}
 
