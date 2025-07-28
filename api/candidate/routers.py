@@ -91,6 +91,7 @@ def remove_candidate(
     - **db**: phiên làm việc với cơ sở dữ liệu
     - **current_user**: người dùng hiện tại (đã xác thực)
     """
+    print(candidate_id)
     delete_candidate(db, candidate_id)
     return {"message": "Candidate deleted successfully"}
 
@@ -208,6 +209,8 @@ def get_all_candidates(db: Session = Depends(get_db), current_user: UserResponse
     - **current_user**: người dùng hiện tại (đã xác thực)
     """
     candidates = db.query(Candidate).filter(Candidate.hr_id == current_user.id).all()
+    for candidate in candidates:
+        print(candidate.id)
     if not candidates:
         return []
     # Lọc ứng viên theo HR ID của người dùng hiện tại

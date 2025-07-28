@@ -10,4 +10,5 @@ Authlib
 pydantic[email]
 bcrypt==4.0.1
 itsdangerous
+httpx
 
